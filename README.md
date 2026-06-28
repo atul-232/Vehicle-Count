@@ -1,12 +1,18 @@
 # Dragon Eye - AI Object Detection and Counting
 
-Dragon Eye is a web dashboard and computer vision application that tracks, classifies, and counts moving objects in video streams. It uses classical computer vision algorithms (OpenCV) rather than deep learning models, making it fast and lightweight.
-
-The application has been rebranded to Dragon Eye and features a custom dragon logo and themed interface. It classifies objects into six categories: Cars, Trucks, Buses, Motorcycles, Autos (Rickshaws), and Pedestrians.
+Live Deployed Website: https://dragon-eye-f23b.onrender.com
 
 ---
 
-## Features
+## Project Overview
+
+Dragon Eye is a web-based computer vision application designed to detect, track, classify, and count moving objects in video streams. The application uses classical image processing algorithms rather than resource-heavy deep learning models, making it lightweight and highly performant. 
+
+The system isolates moving objects, projects bounding boxes around them, draws their path history, and counts them as they cross a specified entry line. It classifies objects into six categories: Cars, Trucks, Buses, Motorcycles, Autos (Rickshaws), and Pedestrians.
+
+---
+
+## Key Features
 
 * **Welcome Screen**: A diagnostics loader screen that plays for 3 seconds when the application starts.
 * **Unified Control Console**: Located on the left panel, grouping together the Play, Pause, Stop, and Speed controls.
@@ -17,6 +23,54 @@ The application has been rebranded to Dragon Eye and features a custom dragon lo
 * **Telemetry Stats**: Live tracking of the total counted objects, active objects in frame, flow rate (objects per minute), and processing FPS.
 * **Real-time Charts**: A doughnut chart displaying the count of each object type, plus flow rate and active object charts over time.
 * **Log Exporters**: Buttons to export tracking events to a CSV file or download the annotated video as an MP4 file.
+
+---
+
+## How to Install and Run Locally
+
+If the live website link above is inactive or you want to run the project on your local machine, follow these detailed steps to set up, compile, and execute the application:
+
+### 1. Prerequisites
+Ensure you have the following software installed on your machine:
+* Python (version 3.9 or higher)
+* Git (to clone the repository)
+* Web browser (Chrome, Firefox, Safari, or Edge)
+
+### 2. Clone the Repository
+Open your terminal (macOS/Linux) or Command Prompt/PowerShell (Windows) and clone the project files:
+```bash
+git clone https://github.com/atul-232/Vehicle-Count.git
+cd Vehicle-Count
+```
+
+### 3. Set Up a Virtual Environment
+A virtual environment isolates the project dependencies from your global Python installation.
+
+On macOS and Linux:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+On Windows:
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+### 4. Install Dependencies
+Install all the required Python libraries listed in the requirements file:
+```bash
+pip install -r requirements.txt
+```
+This command installs FastAPI for the web server, OpenCV-headless for the computer vision engine, Numpy for calculations, and other utility packages.
+
+### 5. Launch the Application
+Start the server and browser launcher script:
+```bash
+python run.py
+```
+This script will start the FastAPI backend server on http://localhost:8000 and automatically open the web dashboard in your default browser. If it does not open automatically, open your browser and navigate to http://localhost:8000.
 
 ---
 
@@ -40,53 +94,7 @@ Vehicle-Count/
 
 ---
 
-## How to Run the Application
-
-### 1. Prerequisites
-Ensure you have Python 3.9 or higher installed.
-
-### 2. Setup and Installation
-Create a virtual environment and install the required dependencies:
-
-```bash
-# Clone the repository
-git clone https://github.com/atul-232/Vehicle-Count.git
-cd Vehicle-Count
-
-# Create virtual environment
-python3 -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 3. Start the Server
-Run the launcher script to start the backend server and open the web dashboard:
-
-```bash
-python run.py
-```
-
-The application will open automatically in your browser at http://localhost:8000.
-
----
-
-## Online Deployment
-
-You can deploy this application online using Render:
-
-1. Sign up for a free account at https://render.com.
-2. Click New -> Web Service.
-3. Connect your GitHub repository.
-4. Render will automatically detect the render.yaml configuration file and configure the build settings.
-5. Once deployment completes, Render will provide you with a public URL to access your dashboard online.
-
----
-
-## Algorithm Details
+## Technical Methodology
 
 1. **Region of Interest (ROI)**: Restricts analysis to the bottom 60% of the frame to filter out false movements in the background (like trees or clouds).
 2. **Background Subtraction**: Uses a K-Nearest Neighbors (KNN) subtractor to isolate moving objects from the background.
