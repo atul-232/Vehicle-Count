@@ -74,6 +74,18 @@ The application will open automatically in your browser at http://localhost:8000
 
 ---
 
+## Online Deployment
+
+You can deploy this application online using Render:
+
+1. Sign up for a free account at https://render.com.
+2. Click New -> Web Service.
+3. Connect your GitHub repository.
+4. Render will automatically detect the render.yaml configuration file and configure the build settings.
+5. Once deployment completes, Render will provide you with a public URL to access your dashboard online.
+
+---
+
 ## Algorithm Details
 
 1. **Region of Interest (ROI)**: Restricts analysis to the bottom 60% of the frame to filter out false movements in the background (like trees or clouds).
