@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Eye // AI Object Detection & Counting</title>
+    <meta name="description" content="A premium glassmorphic dashboard for computer vision-based real-time vehicle tracking and counting. Built with FastAPI and OpenCV.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" onload="lucide.createIcons()"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Full-screen Intro Boot Loader (Vehicle Counting Animation) -->
+    <div id="login-loader" class="login-loader">
+        <div class="loader-content">
+            <div class="vehicle-counting-anim">
+                <div class="sensor-bar"></div>
+                <div class="car-sprite">
+                    <i data-lucide="car"></i>
+                </div>
+                <div class="count-particle-burst" id="particle-burst"></div>
+            </div>
+            <h2>WELCOME TO OBJECT DETECTION</h2>
+            <p id="boot-status-text">INITIALIZING AI SCANNER PORTAL...</p>
+            <div class="boot-progress-container">
+                <div class="boot-progress-bar" id="boot-progress-bar"></div>
+            </div>
+            <div class="boot-odometer-container">
+                <div class="boot-odometer-label">CALIBRATED LOGS</div>
+                <div class="boot-odometer" id="boot-odometer">000</div>
+            </div>
+            <div class="boot-log" id="boot-log">
+                <div class="log-line">[SYSTEM] READY TO INITIALIZE TRAFFIC SYSTEM...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-container" style="opacity: 0; transform: scale(0.98); transition: opacity 0.8s ease, transform 0.8s ease;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <img src="dragon_logo.jpg" alt="Dragon Eye Logo" class="logo-img-el pulse-icon">
+                </div>
+                <div class="logo-text">
+                    <h1>DRAGON EYE</h1>
+                    <span>AI Object Detection // v2.0</span>
+                </div>
+            </div>
+            
+            <div class="search-bar-container">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" placeholder="Search logs or metrics..." id="search-input">
+            </div>
+
+            <div class="header-right">
+                <button class="status-indicator-btn offline" id="connection-status-btn">
+                    <span class="status-dot disconnected" id="connection-status-dot"></span>
+                    <span class="status-label" id="connection-status-text">SYSTEM OFFLINE • DISCONNECTED</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout (Mockup exact match) -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Column: Control Console -->
+            <section class="dashboard-card panel-left" aria-labelledby="control-panel-title">
+                <h2 id="control-panel-title" class="panel-title"><i data-lucide="sliders"></i> Control Console</h2>
+                
+                <!-- Video Selector -->
+                <div class="control-group">
+                    <h3>Select Data Stream</h3>
+                    <div class="select-wrapper">
+                        <select id="video-select">
+                            <option value="" disabled selected>Choose a video...</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Upload Zone -->
+                <div class="control-group">
+                    <h3>Upload Local Stream</h3>
+                    <div class="upload-dropzone" id="upload-zone">
+                        <i data-lucide="upload-cloud" class="upload-icon"></i>
+                        <p class="upload-text">Drag & drop to upload <span class="highlight">or click to browse</span></p>
+                        <input type="file" id="file-input" accept="video/*" style="display: none;">
+                    </div>
+                    <div id="upload-progress-container" class="upload-progress-container" style="display: none;">
+                        <div class="progress-bar">
+                            <div id="upload-progress-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="upload-progress-label">Uploading: 0%</span>
+                    </div>
+                </div>
+
+                <!-- Playback controls -->
+                <div class="control-group">
+                    <h3>Stream Playback</h3>
+                    <div class="playback-controls">
+                        <button id="btn-play" class="btn btn-primary" disabled><i data-lucide="play"></i> Start</button>
+                        <button id="btn-pause" class="btn btn-secondary" disabled><i data-lucide="pause"></i> Pause</button>
+                        <button id="btn-stop" class="btn btn-danger" disabled><i data-lucide="square"></i> Stop</button>
+                    </div>
+                    
+                    <!-- Timeline Scrub / Rewind bar -->
+                    <div class="timeline-container">
+                        <button id="btn-rewind" class="btn-timeline-rewind" title="Rewind 5 seconds"><i data-lucide="rotate-ccw"></i></button>
+                        <input type="range" id="timeline-slider" class="timeline-slider" min="0" max="100" value="0">
+                        <span id="timeline-time" class="timeline-time">00:00 / 00:00</span>
+                    </div>
+                </div>
+
+                <!-- Speed controls -->
+                <div class="control-group">
+                    <div class="speed-header">
+                        <h3>Analysis Speed</h3>
+                        <span id="speed-value">1.0x</span>
+                    </div>
+                    <div class="range-slider-container">
+                        <input type="range" id="speed-slider" min="0.25" max="3" step="0.25" value="1.0">
+                    </div>
+                </div>
+
+                <!-- Export options -->
+                <div class="control-group export-group">
+                    <h3>Export & Reports</h3>
+                    <div class="export-actions">
+                        <button id="btn-export-csv" class="btn btn-outline" disabled><i data-lucide="download"></i> CSV Report</button>
+                        <button id="btn-export-video" class="btn btn-outline" disabled><i data-lucide="film"></i> Processed Video</button>
+                    </div>
+                    <div id="export-loader" class="export-loader" style="display: none;">
+                        <div class="spinner"></div>
+                        <span>Processing final video, please wait...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center Column: Viewport & Flow Chart -->
+            <div class="column-center">
+                <!-- Top Card: Live Viewport -->
+                <section class="dashboard-card panel-viewport" aria-labelledby="viewport-title">
+                    <div class="viewport-header">
+                        <h2 id="viewport-title" class="panel-title"><i data-lucide="monitor"></i> Live Viewport</h2>
+                        <div class="view-toggles">
+                            <button class="toggle-btn active" data-view="annotated">Annotated</button>
+                            <button class="toggle-btn" data-view="mask">CV Mask</button>
+                            <button class="toggle-btn" data-view="split">Split Screen</button>
+                        </div>
+                    </div>
+                    
+                    <div class="viewport-container" id="viewport-container">
+                        <div class="live-counter-badge" id="live-counter-badge" style="display: none;">
+                            OBJECTS DETECTED: <span id="live-badge-count">0</span>
+                        </div>
+                        <div class="canvas-wrapper" id="canvas-wrapper">
+                            <canvas id="video-canvas"></canvas>
+                            <div class="stream-placeholder" id="stream-placeholder">
+                                <i data-lucide="video" class="placeholder-icon"></i>
+                                <p>No Active Stream</p>
+                                <span>Select a video, then click "SYSTEM OFFLINE" or "Start"</span>
+                            </div>
+                    </div>
+
+                    </div>
+                </section>
+
+                <!-- Bottom Card: Large Traffic Flow Over Time Graph -->
+                <section class="dashboard-card panel-flow-graph" aria-labelledby="flow-graph-title">
+                    <div class="flow-graph-header">
+                        <h2 id="flow-graph-title" class="panel-title"><i data-lucide="trending-up"></i> Traffic Flow Over Time</h2>
+                        <div class="filter-wrapper">
+                            <select id="graph-lane-filter">
+                                <option value="all">All Lanes</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="filter-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-container large-graph">
+                        <canvas id="flow-chart"></canvas>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Telemetry, Sparklines & Logs -->
+            <div class="column-right">
+                <!-- Top Card: Telemetry Grid -->
+                <section class="dashboard-card panel-telemetry" aria-labelledby="telemetry-title">
+                    <h2 id="telemetry-title" class="panel-title"><i data-lucide="cpu"></i> Telemetry</h2>
+                    <div class="metrics-grid">
+                        <div class="metric-card cyan-glow">
+                            <div class="metric-header-layout">
+                                <div class="metric-icon"><i data-lucide="car"></i></div>
+                                <span class="metric-label">Object Counter</span>
+                            </div>
+                            <div class="metric-body-layout">
+                                <span class="metric-val" id="stat-total-count">0</span>
+                                <canvas class="sparkline-canvas" id="sparkline-counted"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="metric-card violet-glow">
+                            <div class="metric-header-layout">
+                                <div class="metric-icon"><i data-lucide="eye"></i></div>
+                                <span class="metric-label">Active Objects</span>
+                            </div>
+                            <div class="metric-body-layout">
+                                <span class="metric-val" id="stat-active-count">0</span>
+                                <canvas class="sparkline-canvas" id="sparkline-active"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="metric-card green-glow">
+                            <div class="metric-header-layout">
+                                <div class="metric-icon"><i data-lucide="trending-up"></i></div>
+                                <span class="metric-label">Flow Rate</span>
+                            </div>
+                            <div class="metric-body-layout">
+                                <span class="metric-val" id="stat-flow-rate">0 <span class="unit">v/m</span></span>
+                                <canvas class="sparkline-canvas" id="sparkline-flow"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="metric-card orange-glow">
+                            <div class="metric-header-layout">
+                                <div class="metric-icon"><i data-lucide="gauge"></i></div>
+                                <span class="metric-label">Processing Speed</span>
+                            </div>
+                            <div class="metric-body-layout">
+                                <span class="metric-val" id="stat-fps">0 <span class="unit">fps</span></span>
+                                <canvas class="sparkline-canvas" id="sparkline-fps"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Middle Card: Real-time Analytics -->
+                <section class="dashboard-card panel-analytics" aria-labelledby="analytics-title">
+                    <h2 id="analytics-title" class="panel-title"><i data-lucide="bar-chart-3"></i> Real-time Analytics</h2>
+                    <div class="side-charts-container">
+                        <div class="mini-chart-wrapper">
+                            <h4>Object Types</h4>
+                            <div class="mini-canvas-container">
+                                <canvas id="type-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="mini-chart-wrapper">
+                            <h4>Density Profile</h4>
+                            <div class="mini-canvas-container">
+                                <canvas id="density-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Bottom Card: Detection Terminal -->
+                <section class="dashboard-card panel-terminal" aria-labelledby="log-title">
+                    <div class="terminal-header">
+                        <h2 id="log-title" class="panel-title"><i data-lucide="terminal"></i> Detection Log</h2>
+                        <button class="btn-clear" id="btn-clear-logs"><i data-lucide="trash-2"></i> Clear</button>
+                    </div>
+                    <div class="terminal-body-wrapper">
+                        <div class="terminal-body" id="event-log-container">
+                            <div class="terminal-line placeholder">System idle. Open feed to start logging...</div>
+                        </div>
+                        <!-- Glowing Shield Logo matching mockup -->
+                        <div class="terminal-decor-shield">
+                            <i data-lucide="shield-check"></i>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Designed by Dragon Eye @ 2026</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

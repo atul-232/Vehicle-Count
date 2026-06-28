@@ -1,0 +1,26 @@
+# Python environments
+venv/
+.venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary streaming files
+temp/
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.csv
+
+# OS specific files
+.DS_Store
+Thumbs.db

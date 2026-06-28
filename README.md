@@ -1,155 +1,107 @@
-# Vehicle Count Challenge – Vehant Hackathon (Jan 2026)
+# Dragon Eye // AI Object Detection & Counting
 
-## Problem Overview
+A premium, interactive real-time computer vision dashboard and web application that tracks, classifies, and counts moving objects in video streams. Built using **classical computer vision algorithms** (without heavy deep-learning dependencies) and a modern glassmorphic web dashboard interface.
 
-The objective of this challenge is to estimate the **total number of vehicles** appearing in a traffic video captured from a **static camera**, where vehicles are **moving away from the camera**.
-
-This solution strictly follows the hackathon constraints by using **classical computer vision techniques only**, without relying on any deep learning or learning-based object detection models.
+Rebranded to **DRAGON EYE** with custom fire-dragon portal aesthetics, this application can run live detection on pedestrians, auto-rickshaws, bikes, cars, trucks, and buses.
 
 ---
 
-## Key Constraints Followed
+## 🌟 Key Features
 
-- No deep learning models (YOLO, SSD, Faster R-CNN, etc.)
-- No pretrained or trained models
-- No hardcoded video paths or outputs
-- Classical image processing techniques only
-- Reproducible and self-contained solution
-- Works on unseen / hidden test videos
-
----
-
-## Approach Summary
-
-The solution follows a **motion-based vehicle counting pipeline** consisting of:
-
-- Region of Interest (ROI) Selection
-- Background Subtraction
-- Morphological Processing
-- Contour Detection
-- Centroid-Based Object Tracking
-- Direction-Aware Vehicle Counting
-
-Each vehicle is counted **exactly once** when it satisfies a well-defined movement condition.
-
----
-
-## Detailed Methodology
-
-### 1. Region of Interest (ROI)
-
-- Only the **bottom 60% of the frame** is processed
-- Corresponds to the road region
-- Eliminates irrelevant background such as sky and buildings
-- Improves accuracy and reduces noise
+* **Dragon Portal Aesthetics**: A premium light-themed glassmorphic layout featuring a circular fire-dragon logo emblem, smooth CSS animations, and a fully responsive grid.
+* **Welcome Scanning Loader**: A cinematic welcome boot loader that runs high-tech diagnostic scanning logs for 3 seconds before displaying the dashboard.
+* **Unified Playback & Seeker Console**:
+  * Shipped directly inside the left **Control Console** for a clean, unified layout.
+  * Includes standard Play, Pause, and Stop buttons.
+  * Features a **Timeline Progress Seek Slider** allowing real-time scrubbing and seeking through the video (even when paused!).
+  * A **Rewind Button** that skips backward in the stream by **5 seconds** instantly.
+* **6-Way Smart Classification**:
+  * Automatically separates objects into six distinct categories: **Cars**, **Trucks**, **Buses**, **Motorcycles**, **Autos (Rickshaws)**, and **Pedestrians**.
+  * Highly calibrated dimension, area, and aspect ratio profiles prevent classification errors (e.g. walking men counted as Cars, or Autos categorized as Trucks).
+  * Automatically handles partial contours (like walking legs) using a small-area fallback filter.
+* **Three-Viewport Visualization**:
+  * **Annotated Feed**: High-framerate canvas displaying detected object bounding boxes, category labels, path history trails, crossing lines, and tracking IDs.
+  * **CV Foreground Mask**: Live visualization of the background subtraction mask showing how the CV algorithm isolates moving blobs.
+  * **Split View**: Side-by-side feed showing the annotated RGB stream and the CV mask simultaneously.
+* **Telemetry Statistics Panel**:
+  * **Object Counter**: Cumulative odometer tracking total counted objects.
+  * **Active Objects**: Number of targets currently in the scene.
+  * **Flow Rate**: Objects crossed per minute.
+  * **Processing FPS**: Processing speed of the computer vision engine.
+* **6-Way Doughnut Type Chart**: A color-coded segment chart updating dynamically in real time for Cars (Sky Blue), Trucks (Violet), Buses (Orange), Bikes (Green), Autos (Gold), and Pedestrians (Pink).
+* **Cyberpunk Activity Log**: Terminal showing scrolling detection events with cross speeds and object descriptors.
 
 ---
 
-### 2. Background Subtraction
+## 🛠️ Technology Stack
 
-- Uses **KNN Background Subtractor**
-  (`cv2.createBackgroundSubtractorKNN`)
-- Suitable for:
-  - Static cameras
-  - Gradual illumination changes
-  - Long video sequences
-- Shadow pixels are removed using thresholding to reduce false detections
+* **Frontend**: HTML5, Vanilla CSS3 (Custom Glassmorphism), JavaScript (WebSockets, HTML5 Canvas, Chart.js, Lucide Icons)
+* **Backend**: FastAPI, Uvicorn, Python WebSockets
+* **Computer Vision**: OpenCV (KNN Background Subtractor, Morphological Filtering, Contour Detection, Centroid Tracker)
 
 ---
 
-### 3. Morphological Processing
+## 📁 Project Structure
 
-- **Closing** operation merges fragmented vehicle regions
-- **Opening** operation removes small noise blobs
-- A larger kernel ensures each vehicle appears as a single connected component
-- Improves contour stability
-
----
-
-### 4. Contour Detection
-
-- External contours are extracted from the foreground mask
-- Small contours (area < 2000 pixels) are ignored to filter:
-  - Pedestrians
-  - Noise
-  - Background artifacts
-- Bounding boxes are created for valid vehicle candidates
-
----
-
-### 5. Centroid-Based Tracking
-
-- A custom **CentroidTracker** assigns a unique ID to each detected vehicle
-- Tracks objects across frames using centroid proximity
-- Handles temporary occlusions with a `max_disappeared` threshold
-- Prevents multiple counting of the same vehicle
+```text
+Vehicle-Count/
+├── backend/
+│   ├── tracker.py        # Refactored classical CentroidTracker with path history
+│   ├── processor.py      # Video frame processor & 6-class annotation classifier
+│   └── server.py         # FastAPI Web server with seek-control and no-cache middleware
+├── frontend/
+│   ├── index.html        # Glassmorphic dashboard UI
+│   ├── style.css         # Premium stylesheet with dragon logo styles
+│   ├── app.js            # WebSocket client, timeline seekbar handlers, and UI logic
+│   └── dragon_logo.jpg   # Custom circular fire-dragon emblem asset
+├── run.py                # Dashboard launcher script
+├── requirements.txt      # Python dependencies list
+└── .gitignore            # Git exclusion settings
+```
 
 ---
 
-### 6. Direction-Aware Vehicle Counting
+## 🚀 How to Run the Dashboard
 
-A vehicle is counted **only when all conditions are satisfied**:
+### 1. Prerequisite Check
+Ensure you have Python 3.9+ installed on your computer.
 
-- The vehicle has not been counted before
-- It is moving **away from the camera**
-- It has moved at least **60 pixels upward** in ROI coordinates
-
-This logic prevents:
-- Double counting
-- Counting stationary objects
-- Counting noise blobs
-
----
-
-### 7. Output
-
-The `forward(video_path)` method returns:
-
-int # total number of vehicles
-
-- No printing or logging inside the solution
-- Output handling is done externally by the caller
-
----
-
-## Project Structure
-
-Vehicle_Count/
-├── README.md
-├── main.py # Solution class and forward() method
-├── requirements.txt # Python dependencies
-├── test.py # Sample runner script
-└── video_03.mp4 # Sample input video
-
----
-
-## How to Run
-
-### 1. Install Dependencies
-
+### 2. Set Up Virtual Environment & Dependencies
+Create a virtual environment and install the required libraries:
 ```bash
-pip install -r requirements.txt
-2. Run Using test.py (Recommended)
-python test.py
-Ensure video_03.mp4 is present in the same directory or update the video path inside test.py.
-3. Manual Usage
-You may also run the solution directly from any Python script:
-from main import Solution
+# Clone the repository (if not already local)
+git clone https://github.com/atul-232/Vehicle-Count.git
+cd Vehicle-Count
 
-solution = Solution()
-count = solution.forward("video_03.mp4")
-print("Total Vehicles Counted:", count)
-Dependencies
-Listed in requirements.txt:
-Python 3.x
-OpenCV
-NumPy
-No internet access is required at runtime.
-Assumptions
-Camera is static
-Vehicles move away from the camera
-Video input is continuous without abrupt camera movement
-Minor lighting changes are handled by background modeling
-Conclusion
-This solution provides a robust, rule-compliant, and reproducible approach to vehicle counting using classical computer vision techniques.
-It is designed to generalize effectively across different traffic videos and hidden evaluation datasets.
+# Create virtual environment
+python3 -m venv venv
+
+# Activate and install dependencies
+source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+pip install -r requirements.txt
+```
+
+### 3. Launch the Application
+Run the launcher script to automatically start the backend and open the web dashboard:
+```bash
+python run.py
+```
+A browser window will open automatically at **`http://localhost:8000`**.
+
+---
+
+## 🧠 Methodology & Algorithm
+
+The core solution relies on **classical computer vision techniques only**, complying with strict hackathon rules that prohibit deep learning models:
+
+1. **Region of Interest (ROI)**: Focuses processing only on the bottom 60% of the frame (the road roadbed). This filters out trees, clouds, buildings, and sky, reducing false detections.
+2. **Background Subtraction**: Uses `cv2.createBackgroundSubtractorKNN` to detect motion. The algorithm handles gradual illumination changes and filters shadows.
+3. **Morphological Filtering**: Performs **Closing** (merging fragmented blobs of the same vehicle) and **Opening** (eliminating salt-and-pepper noise) with custom kernels.
+4. **Contour Extraction**: Identifies external contours and filters out noise blobs.
+5. **Centroid Tracking**: Matches centroids across frames using Euclidean distance. Vehicles are kept in state even during brief occlusions (`max_disappeared=25`).
+6. **Smart Classification**:
+   * **Pedestrians**: Vertical aspect ratio (`ar < 0.58`, `bw < 60`, `area < 6500`) or small contours (`area < 2800`).
+   * **Bikes**: Narrow aspect ratio (`ar < 0.85`, `bw < 75`, `area < 9500`).
+   * **Autos**: Boxy shapes (`0.62 <= ar <= 1.25`, `55 <= bw <= 135`, `3500 <= area < 19000`).
+   * **Large (Buses/Trucks)**: Large areas (`area > 24000`, `bw > 140`, `bh > 95`).
+   * **Cars**: Standard default classification.
